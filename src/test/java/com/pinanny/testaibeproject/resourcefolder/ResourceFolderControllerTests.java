@@ -1,15 +1,12 @@
 package com.pinanny.testaibeproject.resourcefolder;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.util.Map;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -25,9 +22,6 @@ class ResourceFolderControllerTests {
 
 	@Autowired
 	private MockMvc mvc;
-
-	@Autowired
-	private ObjectMapper objectMapper;
 
 	@Test
 	void createsResourceFolder() throws Exception {
@@ -45,7 +39,7 @@ class ResourceFolderControllerTests {
 
 	@Test
 	void returnsCreatedResourceFolderById() throws Exception {
-		String response = this.mvc.perform(post("/resource-folders")
+		String location = this.mvc.perform(post("/resource-folders")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content("""
 						{"name":"Engineering"}
@@ -53,13 +47,12 @@ class ResourceFolderControllerTests {
 			.andExpect(status().isCreated())
 			.andReturn()
 			.getResponse()
-			.getContentAsString();
-		Map<String, Object> created = this.objectMapper.readValue(response, new TypeReference<>() {
-		});
+			.getHeader("Location");
 
-		String id = (String) created.get("id");
+		assertNotNull(location);
+		String id = location.substring(location.lastIndexOf('/') + 1);
 
-		this.mvc.perform(get("/resource-folders/{id}", id))
+		this.mvc.perform(get(location))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.id").value(id))
 			.andExpect(jsonPath("$.name").value("Engineering"));
