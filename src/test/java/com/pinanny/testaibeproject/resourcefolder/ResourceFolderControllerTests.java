@@ -6,22 +6,24 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 import java.util.UUID;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(ResourceFolderController.class)
-@Import(ResourceFolderService.class)
 class ResourceFolderControllerTests {
 
-	@Autowired
 	private MockMvc mvc;
+
+	@BeforeEach
+	void setUp() {
+		ResourceFolderService service = new ResourceFolderService();
+		this.mvc = standaloneSetup(new ResourceFolderController(service)).build();
+	}
 
 	@Test
 	void createsResourceFolder() throws Exception {
